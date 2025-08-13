@@ -1,0 +1,23 @@
+{
+  "name": "MeteoCast",
+  "short_name": "MeteoCast",
+  "description": "Meteo, maree, luna e pesca. PWA mobile per coste e lagune.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1b425c",
+  "theme_color": "#1b425c",
+  "icons": [
+    {
+      "src": "/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "lang": "it-IT",
+  "orientation": "portrait"
+}
