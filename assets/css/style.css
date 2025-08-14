@@ -1589,6 +1589,121 @@ canvas {
   transition: width 0.2s ease;
 }
 
+/* === STAZIONI (MAPPA + LISTA) ============================================ */
+#stazioni-map .leaflet-map-widget{
+  height:420px; min-height:300px; width:100%;
+  border-radius:12px; overflow:hidden;
+}
+
+/* Leaflet: armonizza controlli e popup con il design system */
+#stazioni-map .leaflet-container a{ color:inherit; }
+#stazioni-map .leaflet-control-zoom a,
+#stazioni-map .leaflet-control-layers,
+#stazioni-map .leaflet-bar a{
+  background:#fff; color:#213447;
+  border:1px solid rgba(0,0,0,.06);
+  box-shadow:0 4px 16px rgba(16,28,48,.10);
+}
+#stazioni-map .leaflet-control-zoom a{ border-radius:10px; }
+#stazioni-map .leaflet-bar a:hover{ background:#f7fbff; }
+
+#stazioni-map .leaflet-popup-content-wrapper,
+#stazioni-map .leaflet-popup-tip{
+  background:#fff; color:#2b2f36;
+  border-radius:10px; box-shadow:0 10px 30px rgba(16,28,48,.15);
+}
+
+/* MarkerCluster */
+#stazioni-map .marker-cluster-small div { background:rgba(0,123,255,.75); }
+#stazioni-map .marker-cluster-medium div{ background:rgba(0,156,135,.78); }
+#stazioni-map .marker-cluster-large div { background:rgba(13,110,253,.82); }
+#stazioni-map .marker-cluster div{
+  color:#fff; border:2px solid #fff;
+}
+
+/* visibilità */
+.badge .bi-eye { vertical-align: -2px; }
+
+/* Lista sensori / righe widget */
+.day-forecast-accordion-list .sensor-value-display{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.day-forecast-accordion-list .station-info{
+  display:flex; flex-wrap:wrap; gap:4px;
+}
+.day-forecast-accordion-list .sensor-icon{
+  display:inline-block; width:24px; text-align:center;
+}
+.day-forecast-accordion-list .sensor-value-display .badge{ font-size:.85em; }
+
+/* Barra vento */
+.day-forecast-accordion-list .windbar-box{ min-width:140px; display:grid; gap:4px; }
+.day-forecast-accordion-list .windbar-label{ font-size:.9em; color:#334; }
+.day-forecast-accordion-list .windbar-bar{
+  --w:0%;
+  display:block; height:6px; border-radius:4px;
+  background:linear-gradient(90deg,#8fd3f4 0%,#84fab0 var(--w),#e9ecef var(--w),#e9ecef 100%);
+}
+
+/* --- Stazioni: filtri & stale --- */
+.sensor-filters .btn {
+  margin: 2px;
+}
+
+.badge-stale {
+  background: #e9ecef;
+  color: #6c757d;
+  font-weight: 500;
+  border: 1px solid #dee2e6;
+}
+
+.leaflet-marker-icon.marker-stale {
+  filter: grayscale(90%) opacity(0.65);
+}
+
+/* Popup stazioni coerente con i widget */
+.station-popup {
+  max-width: 300px;
+}
+.station-popup .station-name {
+  font-weight: 600;
+  color: var(--bs-primary);
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: .4rem;
+  margin-bottom: .5rem;
+}
+.sensor-popup-item {
+  padding: .2rem 0;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  font-size: .92rem;
+}
+.sensor-popup-item:last-child { border-bottom: none; }
+.sensor-popup-item .sensor-name { font-weight: 500; color: #495057; }
+
+/* Mappa come widget */
+#map-container.widget-map {
+  height: 420px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--widget-bg, #0b2239);
+}
+@media (max-width: 768px) {
+  #map-container.widget-map { height: 340px; }
+}
+
+/* User marker (pulse) */
+.user-marker .um-dot{
+  width:12px; height:12px; border-radius:50%;
+  background:#ff4d4d;
+  box-shadow:0 0 0 0 rgba(255,77,77,.6);
+  animation:userPulse 2s infinite;
+}
+@keyframes userPulse{
+  0%{ box-shadow:0 0 0 0 rgba(255,77,77,.6); }
+  70%{ box-shadow:0 0 0 12px rgba(255,77,77,0); }
+  100%{ box-shadow:0 0 0 0 rgba(255,77,77,0); }
+}
+
 
 /* MEDIA QUERY */
 @media (min-width: 375px) {

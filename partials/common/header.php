@@ -40,6 +40,11 @@ error_reporting(E_ALL);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 
+  <!-- Leaflet CSS (usato nella vista Stazioni) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css">
+
   <!-- Style -->
   <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css" />
 
