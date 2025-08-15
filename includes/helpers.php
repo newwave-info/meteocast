@@ -1627,41 +1627,46 @@ function getTrafficLightLevels(
 
         // ===== SAFETY MIGLIORATO =====
         $rs = [];
-        $safety_scores = [];
+        $safety_scores = [
+          'precip'     => 0.0,
+          'wind'       => 0.0,
+          'visibility' => 0.0,
+          'pressure'   => 0.0,
+      ];
 
         // PRECIPITAZIONI - Logica migliorata
-        if (!is_null($p) && $p > 0) {
-            if ($p >= 8.0) {
-                $safety_scores['precip'] = 4.0;
-                $rs[] = "Pioggia molto intensa: " . round($p, 1) . " mm/h";
-            } elseif ($p >= 5.0) {
-                $safety_scores['precip'] = 3.0;
-                $rs[] = "Pioggia intensa: " . round($p, 1) . " mm/h";
-            } elseif ($p >= 2.5) {
-                $safety_scores['precip'] = 2.0;
-                $rs[] = "Pioggia consistente: " . round($p, 1) . " mm/h";
-            } elseif ($p >= 1.0) {
-                $safety_scores['precip'] = 1.0;
+      if (!is_null($p) && $p > 0) {
+        if ($p >= 8.0) {
+            $safety_scores['precip'] = 4.0;
+            $rs[] = "Pioggia molto intensa: " . round($p, 1) . " mm/h";
+        } elseif ($p >= 5.0) {
+            $safety_scores['precip'] = 3.0;
+            $rs[] = "Pioggia intensa: " . round($p, 1) . " mm/h";
+        } elseif ($p >= 2.5) {
+            $safety_scores['precip'] = 2.0;
+            $rs[] = "Pioggia consistente: " . round($p, 1) . " mm/h";
+        } elseif ($p >= 1.0) {
+            $safety_scores['precip'] = 1.0;
                 // Solo se combinata con altri fattori
-                if (!is_null($w) && $w >= 20) $rs[] = "Pioggia con vento forte";
-            }
-        } else {
-            $safety_scores['precip'] = 0.0;
+            if (!is_null($w) && $w >= 20) $rs[] = "Pioggia con vento forte";
         }
+    } else {
+        $safety_scores['precip'] = 0.0;
+    }
 
         // VENTO E RAFFICHE - Analisi combinata migliorata
-        $wind_safety = 0.0;
-        $wind_reasons = [];
-        
-        if (!is_null($w)) {
-            $ws = $wind_score_map_safety[getWindUnifiedLevel($w)] ?? 0;
-            $wind_safety += $ws;
-            if ($ws >= 3.0) $wind_reasons[] = "vento molto forte (" . round($w) . " km/h)";
-            elseif ($ws >= 2.0) $wind_reasons[] = "vento forte (" . round($w) . " km/h)";
-        }
-        
-        if (!is_null($g)) {
-            $gs = $wind_score_map_safety[getWindUnifiedLevel($g)] ?? 0;
+    $wind_safety = 0.0;
+    $wind_reasons = [];
+    
+    if (!is_null($w)) {
+        $ws = $wind_score_map_safety[getWindUnifiedLevel($w)] ?? 0;
+        $wind_safety += $ws;
+        if ($ws >= 3.0) $wind_reasons[] = "vento molto forte (" . round($w) . " km/h)";
+        elseif ($ws >= 2.0) $wind_reasons[] = "vento forte (" . round($w) . " km/h)";
+    }
+    
+    if (!is_null($g)) {
+        $gs = $wind_score_map_safety[getWindUnifiedLevel($g)] ?? 0;
             $gust_bonus = max(0, $gs - $wind_safety) * 0.6; // Bonus raffiche oltre vento medio
             $wind_safety += $gust_bonus;
             if ($gs >= 4.0) $wind_reasons[] = "raffiche violente (" . round($g) . " km/h)";
@@ -1688,7 +1693,7 @@ function getTrafficLightLevels(
             } elseif ($vis_km < 10.0) {
                 $vis_score = 1.0;
                 // Solo se ci sono altri fattori
-                if ($safety_scores['precip'] >= 1.0) $rs[] = "visibilità limitata con pioggia";
+                if (($safety_scores['precip'] ?? 0) >= 1.0) $rs[] = "visibilità limitata con pioggia";
             }
         }
         $safety_scores['visibility'] = $vis_score;
