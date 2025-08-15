@@ -14,7 +14,7 @@
       const d = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
       d.setUTCHours(d.getUTCHours() + 1);
       return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`;
-    } catch { return ''; }
+    } catch(e) { return ''; }
   }
 
   function popupHtml(st) {
@@ -57,7 +57,7 @@
     if (!el) return [];
     const raw = el.getAttribute('data-stazioni');
     if (!raw) return [];
-    try { return JSON.parse(raw); } catch { return []; }
+    try { return JSON.parse(raw); } catch(e) { return []; }
   }
 
   function getUserPos() {
@@ -91,53 +91,68 @@
   }
 
   function init() {
-    if (map || !window.L) return;
-    const container = document.getElementById('map-container');
-    if (!container) return;
+  if (map || !window.L) return;
 
-    container.innerHTML = '';
+  // usa lo stesso elemento da cui leggi i data-attributes
+  const container = document.getElementById('stazioni-map'); // ← cambia qui se il tuo container ha un id diverso
+  if (!container) return;
 
-    map = L.map(container, { zoomControl: true, attributionControl: true })
-            .setView([45.439, 12.33], 11);
+  container.innerHTML = '';
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18, attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+  const low = (window.POWER && window.POWER.isLow());
 
-    cluster = L.markerClusterGroup({
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      disableClusteringAtZoom: 15
-    });
+  map = L.map(container, {
+    zoomControl: true,
+    attributionControl: true,
+    preferCanvas: true,   // meno layout/repaint
+    updateWhenIdle: true  // meno ricalcoli in pan/zoom
+  });
+  map.setView([45.439, 12.33], 11); // ← FIX: niente “.” orfano
 
-    const data = getStazioniData();
-    data.forEach(st => {
-      const lat = Number(st.latitudine);
-      const lon = Number(st.longitudine);
-      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-      const m = L.marker([lat, lon], { title: st.nome || '' });
-      m.bindPopup(popupHtml(st));
-      cluster.addLayer(m);
-    });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap',
+    detectRetina: !low // evita @2x in low-power
+  }).addTo(map);
 
-    map.addLayer(cluster);
+  // cluster fallback se il plugin non è presente
+  cluster = (L.markerClusterGroup
+    ? L.markerClusterGroup({
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        disableClusteringAtZoom: 15
+      })
+    : L.layerGroup());
 
-    const userPos = addUserMarker();
+  const data = getStazioniData();
+  data.forEach(st => {
+    const lat = Number(st.latitudine);
+    const lon = Number(st.longitudine);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const m = L.marker([lat, lon], { title: st.nome || '' });
+    m.bindPopup(popupHtml(st));
+    cluster.addLayer(m);
+  });
 
-    let bounds = null;
-    if (cluster.getLayers().length > 0) bounds = cluster.getBounds();
-    if (userPos) {
-      const userLL = L.latLng(userPos[0], userPos[1]);
-      bounds = bounds ? bounds.extend(userLL) : L.latLngBounds([userLL, userLL]);
-    }
-    if (bounds) {
-      try { map.fitBounds(bounds.pad(0.12)); } catch {}
-    } else {
-      map.setView([45.439, 12.33], 11);
-    }
+  map.addLayer(cluster);
 
-    requestAnimationFrame(() => map.invalidateSize());
+  const userPos = addUserMarker();
+
+  let bounds = null;
+  if (cluster.getLayers && cluster.getLayers().length > 0) bounds = cluster.getBounds();
+  if (userPos) {
+    const userLL = L.latLng(userPos[0], userPos[1]);
+    bounds = bounds ? bounds.extend(userLL) : L.latLngBounds([userLL, userLL]);
   }
+  if (bounds) {
+    try { map.fitBounds(bounds.pad(0.12)); } catch(e) {}
+  } else {
+    map.setView([45.439, 12.33], 11);
+  }
+
+  requestAnimationFrame(() => map.invalidateSize());
+}
+
 
   function mountWhenReady() {
     if (document.getElementById('map-container')) { init(); return; }

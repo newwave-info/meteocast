@@ -10,6 +10,8 @@ class WeatherFX {
     this.width = 0;
     this.height = 0;
     this.dpr = window.devicePixelRatio || 1;
+    this.lowPower = false;
+    this.dprCap = 1.5; // default, ridotto in low-power
 
     this.weatherCode = 0;
     this.isNight = false;
@@ -47,10 +49,15 @@ class WeatherFX {
   this.setWeather(code, night, sunset, sunrise);
 };
 
-
-
 // Prima init: NON inizializzare a 0! Attendi i dati veri.
   }
+
+  setLowPower(flag) {
+  this.lowPower = !!flag;
+  this.dprCap = this.lowPower ? 1.0 : 1.5;  // riduce DPI per batteria
+  this._initEffects();                      // ricalibra densità effetti
+  this.resize();                            // reimposta canvas con DPR attuale
+}
 
   setWeather(code, night = false, sunset = false, sunrise = false) {
   this.weatherCode = parseInt(code);
@@ -197,7 +204,7 @@ class WeatherFX {
   loop(now) {
     if (!this.running) return;
 
-    const targetFPS = 60;
+    const targetFPS = this.lowPower ? 30 : 60;
     const minFrameTime = 1000 / targetFPS;
     const delta = now - this.lastDraw;
 
@@ -382,7 +389,7 @@ class WeatherFX {
 
 
   resize() {
-    this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    this.dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
     this.width = window.innerWidth * this.dpr;
     this.height = window.innerHeight * this.dpr;
     this.canvas.width = this.width;
@@ -396,22 +403,20 @@ class WeatherFX {
 window.weatherFX = new WeatherFX();
 
 
-// BLOCCA EFFETTI METEO SE IL TAB È IN BACKGROUND (CPU/Battery saver)
-document.addEventListener('visibilitychange', function() {
-  if (window.weatherFX) {
-    if (document.hidden) {
-      // Ferma l’animazione completamente
-      window.weatherFX.running = false;
-      // Optional: blocca effetti audio, ecc
-      // console.log('🌙 MeteoFX PAUSA (tab nascosto)');
-    } else {
-      // Riprendi l’animazione solo se non è già partita
-      if (!window.weatherFX.running) {
-        window.weatherFX.running = true;
-        requestAnimationFrame(window.weatherFX.loop);
-        // console.log('☀️ MeteoFX RIPRENDE (tab visibile)');
-      }
-    }
+function syncWeatherFXPower() {
+  if (!window.weatherFX) return;
+  const low = (window.POWER && window.POWER.isLow()) || document.hidden;
+  window.weatherFX.setLowPower(low);
+  if (low) {
+    window.weatherFX.running = false;
+  } else if (!window.weatherFX.running) {
+    window.weatherFX.running = true;
+    requestAnimationFrame(window.weatherFX.loop);
   }
-});
+}
+document.addEventListener('power:change', syncWeatherFXPower);
+document.addEventListener('visibilitychange', syncWeatherFXPower);
+window.addEventListener('pageshow', syncWeatherFXPower);
+window.addEventListener('pagehide', syncWeatherFXPower);
+syncWeatherFXPower();
 

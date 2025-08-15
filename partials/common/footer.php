@@ -38,6 +38,8 @@ if (!isset($model_param)) $model_param = '';
   };
 </script>
 
+<script src="<?= BASE_URL; ?>/assets/js/power-manager.js"></script>
+<script src="<?= BASE_URL; ?>/assets/js/power-debug.js"></script>
 <script src="<?= BASE_URL; ?>/assets/js/weather-background.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {

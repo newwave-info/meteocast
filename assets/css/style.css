@@ -1590,6 +1590,10 @@ canvas {
 }
 
 /* === STAZIONI (MAPPA + LISTA) ============================================ */
+#stazioni-map {
+  height: 340px;
+}
+
 #stazioni-map .leaflet-map-widget{
   height:420px; min-height:300px; width:100%;
   border-radius:12px; overflow:hidden;
@@ -1702,6 +1706,48 @@ canvas {
   0%{ box-shadow:0 0 0 0 rgba(255,77,77,.6); }
   70%{ box-shadow:0 0 0 12px rgba(255,77,77,0); }
   100%{ box-shadow:0 0 0 0 rgba(255,77,77,0); }
+}
+
+
+
+/* ================= LOW POWER OVERRIDES ================= */
+:root {
+  --ui-blur: 8px;   /* default */
+  --card-blur: 3px; /* default */
+}
+
+html[data-power="low"] {
+  --ui-blur: 0px;
+  --card-blur: 0px;
+}
+
+/* Reindirizza i componenti che usano blur al token */
+.search-panel,
+.navbar-blur,
+.offcanvas,
+.widget,
+.topbar,
+.glass,
+.backdrop-blur {
+  -webkit-backdrop-filter: blur(var(--ui-blur)) !important;
+  backdrop-filter: blur(var(--ui-blur)) !important;
+}
+
+/* Riduci motion quando richiesto dal sistema o in low-power */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+html[data-power="low"] * {
+  animation: none !important;
+  transition: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Debug: forza no-blur quando attivo il toggle dal pannello */
+body.debug-no-blur {
+  --ui-blur: 0px !important;
+  --card-blur: 0px !important;
 }
 
 

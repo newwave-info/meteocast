@@ -1271,3 +1271,50 @@ window.addEventListener('beforeunload', () => {
         }
     });
 });
+
+
+// Debounce via rAF per non interferire con la costruzione dei grafici
+let __applyChartsPowerRAF = null;
+
+function applyChartPowerMode() {
+  if (__applyChartsPowerRAF) cancelAnimationFrame(__applyChartsPowerRAF);
+  __applyChartsPowerRAF = requestAnimationFrame(() => {
+    __applyChartsPowerRAF = null;
+
+    const low = (window.POWER && window.POWER.isLow()) || document.hidden;
+    const dur = low ? 0 : 600;
+
+    if (window.Chart && Chart.defaults) {
+      // Assicurati che esista l’oggetto animation
+      Chart.defaults.animation = Chart.defaults.animation || {};
+      Chart.defaults.animation.duration = dur;
+      Chart.defaults.animation.easing = 'easeOutCubic';
+
+      // Protezione su transitions (alcune build non lo valorizzano)
+      if (Chart.defaults.transitions && Chart.defaults.transitions.active && Chart.defaults.transitions.active.animation) {
+        Chart.defaults.transitions.active.animation.duration = dur;
+      }
+    }
+
+    // Aggiorna SOLO chart ben formate (istanza + options + update)
+    [window.chartWind, window.chartRain, window.chartTemp, window.chartTide]
+      .forEach(ch => {
+        if (!ch || typeof ch.update !== 'function' || !ch.options) return;
+        // Garantisci la presenza dell’oggetto animation per-istanza
+        ch.options.animation = ch.options.animation || {};
+        ch.options.animation.duration = dur;
+
+        // Non forzare subito se il grafico è ancora in bootstrap: usa un microtask
+        Promise.resolve().then(() => {
+          try { ch.update('none'); } catch (e) { /* ignora update prematuri */ }
+        });
+      });
+  });
+}
+
+// Listener “soft” (tutti safe; nessun update immediato)
+document.addEventListener('power:change', applyChartPowerMode);
+document.addEventListener('visibilitychange', applyChartPowerMode);
+window.addEventListener('pageshow', applyChartPowerMode);
+// prima applicazione (dopo init minimo del DOM)
+requestAnimationFrame(applyChartPowerMode);
