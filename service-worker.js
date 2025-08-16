@@ -1,6 +1,6 @@
-// MeteoCast Service Worker v1.2.2
+// MeteoCast Service Worker
 
-const CACHE_NAME = "meteocast-v1.3.0"; // 🔹 Cambia versione per aggiornare la cache
+const CACHE_NAME = "meteocast-v1.4.0"; // 🔹 Cambia versione per aggiornare la cache
 const urlsToCache = [
   // CSS e JS core
   "/assets/css/style.css",
@@ -10,6 +10,8 @@ const urlsToCache = [
   "/assets/js/my-charts.js",
   "/assets/js/search-location.js",
   "/assets/js/weather-background.js",
+  "/assets/js/power-manager.js",
+  "/assets/js/stazioni-map.js",
 
   // Icone PNG e SVG
   "/assets/icons/icon-192.png",

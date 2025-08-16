@@ -1591,7 +1591,7 @@ canvas {
 
 /* === STAZIONI (MAPPA + LISTA) ============================================ */
 #stazioni-map {
-  height: 340px;
+  height: 560px;
 }
 
 #stazioni-map .leaflet-map-widget{
